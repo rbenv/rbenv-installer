@@ -1,0 +1,120 @@
+#!/bin/bash
+# Usage: rbenv doctor
+# Summary: Detects common problems in rbenv installation
+
+set -e
+[ -n "$RBENV_DEBUG" ] && set -x
+
+indent() {
+  sed 's/^/  /'
+}
+
+printc() {
+  local color_name="color_$1"
+  local fmt="$2"
+  shift 2
+
+  if [[ $fmt == *"\n" ]]; then
+    fmt="${!color_name}${fmt%\\n}${color_reset}\n"
+  else
+    fmt="${!color_name}${fmt}${color_reset}"
+  fi
+
+  printf "$fmt" "$@"
+}
+
+if [ -t 1 ]; then
+  color_red=$'\e[31m'
+  color_green=$'\e[32m'
+  color_yellow=$'\e[1;33m'
+  color_reset=$'\e[0m'
+else
+  color_red=""
+  color_green=""
+  color_yellow=""
+  color_reset=""
+fi
+
+warnings=0
+
+if [ $(uname -s) = "Darwin" ]; then
+  bashrc=".bash_profile"
+else
+  bashrc=".bashrc"
+fi
+
+echo -n "Checking for \`rbenv' in PATH: "
+num_locations="$(which -a rbenv | uniq | wc -l)"
+if [ $num_locations -eq 0 ]; then
+  printc red "not found\n"
+  { if [ -x ~/.rbenv/bin/rbenv ]; then
+      echo "You seem to have rbenv installed in \`$HOME/.rbenv/bin', but that"
+      echo "directory is not present in PATH. Please add it to PATH by configuring"
+      echo "your \`~/${bashrc}', \`~/.zshrc', or \`~/.config/fish/config.fish'."
+    else
+      echo "Please refer to https://github.com/sstephenson/rbenv#installation"
+    fi
+  } | indent
+  exit 1
+elif [ $num_locations -eq 1 ]; then
+  printc green "%s\n" "$(which rbenv)"
+else
+  printc yellow "multiple\n"
+  { echo "You seem to have multiple rbenv installs in the following locations."
+    echo "Please pick just one installation and remove the others."
+    echo
+    which -a rbenv
+  } | indent
+  echo
+  : $((warnings++))
+fi
+
+RBENV_ROOT="${RBENV_ROOT:-$(rbenv root)}"
+
+OLDIFS="$IFS"
+IFS=:
+path=( $PATH )
+IFS="$OLDIFS"
+
+echo -n "Checking for rbenv shims in PATH: "
+shims_dir="${RBENV_ROOT}/shims"
+found=""
+for dir in "${path[@]}"; do [ "$dir" != "$shims_dir" ] || found=true; done
+if [ -n "$found" ]; then
+  printc green "OK\n"
+else
+  printc red "not found\n"
+  { echo "The directory \`$shims_dir' must be present in PATH for rbenv to work."
+    echo "Please run \`rbenv init' and follow the instructions."
+  } | indent
+  echo
+  : $((warnings++))
+fi
+
+echo -n "Checking \`rbenv install' support: "
+rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/rbenv-install 2>/dev/null || true
+                    which -a rbenv-install || true
+                  } | uniq)"
+num_installs="$(wc -l <<<"$rbenv_installs")"
+if [ $num_installs -eq 0 ]; then
+  printc red "not found\n"
+  { echo "Unless to plan to add Ruby versions manually, you should install ruby-build."
+    echo "Please refer to https://github.com/sstephenson/ruby-build#installation"
+  }
+  echo
+  : $((warnings++))
+elif [ $num_installs -eq 1 ]; then
+  printc green "$rbenv_installs"
+  printf " (%s)\n" "$("$rbenv_installs" --version || true)"
+else
+  printc yellow "multiple\n"
+  { echo "You seem to have multiple \`rbenv-install' in the following locations."
+    echo "Please pick just one installation and remove the others."
+    echo
+    echo "$rbenv_installs"
+  } | indent
+  echo
+  : $((warnings++))
+fi
+
+[ $warnings -eq 0 ]
