@@ -40,7 +40,12 @@ if [ -n "$rbenv" ]; then
   if [ -x ./brew ]; then
     echo "Trying to update with Homebrew..."
     brew update >/dev/null
-    brew upgrade rbenv
+    if [ "$(./rbenv --version)" < "1.0.0" ] && brew list rbenv | grep -q rbenv/HEAD; then
+      brew uninstall rbenv
+      brew install rbenv --without-ruby-build
+    else
+      brew upgrade rbenv
+    fi
   elif git remote -v 2>/dev/null | grep -q rbenv; then
     echo "Trying to update with git..."
     git pull origin master
@@ -51,7 +56,7 @@ else
   if [ -n "$homebrew" ]; then
     echo "Installing rbenv with Homebrew..."
     brew update
-    brew install rbenv
+    brew install rbenv --without-ruby-build
     rbenv="$(brew --prefix)/bin/rbenv"
   else
     echo "Installing rbenv with git..."
