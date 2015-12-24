@@ -107,7 +107,13 @@ if [ $num_installs -eq 0 ]; then
   : $((warnings++))
 elif [ $num_installs -eq 1 ]; then
   printc green "$rbenv_installs"
-  printf " (%s)\n" "$("$rbenv_installs" --version || true)"
+  if [[ $rbenv_installs == "$RBENV_ROOT"/plugins/* ]]; then
+    rbenv_install_cmd="${rbenv_installs##*/}"
+    rbenv_install_version="$(rbenv "${rbenv_install_cmd#rbenv-}" --version || true)"
+  else
+    rbenv_install_version="$("$rbenv_installs" --version || true)"
+  fi
+  printf " (%s)\n" "$rbenv_install_version"
 else
   printc yellow "multiple\n"
   { echo "You seem to have multiple \`rbenv-install' in the following locations."
