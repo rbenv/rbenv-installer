@@ -19,6 +19,18 @@ if ! type -p git >/dev/null; then
   }
 fi
 
+http() {
+  local url="$1"
+  if type -p curl >/dev/null; then
+    curl -fsSL "$url"
+  elif type -p wget >/dev/null; then
+    wget -q "$url" -O-
+  else
+    echo "Error: couldn't download file. No \`curl' or \`wget' found." >&2
+    return 1
+  fi
+}
+
 rbenv="$(command -v rbenv ~/.rbenv/bin/rbenv | head -1)"
 
 if [ -n "$rbenv" ]; then
@@ -84,6 +96,10 @@ else
     git clone https://github.com/rbenv/ruby-build.git "${rbenv_root}/plugins/ruby-build"
   fi
 fi
+
+echo
+echo "Running doctor script to verify installation..."
+http https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | "$BASH"
 
 echo
 echo "All done!"
