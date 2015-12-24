@@ -27,11 +27,13 @@ if [ -t 1 ]; then
   color_red=$'\e[31m'
   color_green=$'\e[32m'
   color_yellow=$'\e[1;33m'
+  color_bright=$'\e[1;37m'
   color_reset=$'\e[0m'
 else
   color_red=""
   color_green=""
   color_yellow=""
+  color_bright=""
   color_reset=""
 fi
 
@@ -116,5 +118,32 @@ else
   echo
   : $((warnings++))
 fi
+
+echo -n "Counting installed Ruby versions: "
+num_rubies="$(rbenv versions --bare | wc -l)"
+if [ $num_rubies -eq 0 ]; then
+  printc yellow "none\n"
+  echo "There aren't any Ruby versions installed under \`$RBENV_ROOT/versions'." | indent
+  [ $num_installs -eq 0 ] || {
+    echo -n "You can install Ruby versions like so: "
+    printc bright "rbenv install 2.2.4\n"
+  } | indent
+else
+  printc green "%d versions\n" $num_rubies
+fi
+
+echo -n "Checking RubyGems settings: "
+gem_broken=
+for gemrc in ~/.gemrc /etc/gemrc; do
+  if grep -q -e --user-install "$gemrc" 2>/dev/null; then
+    if [ -z "$gem_broken" ]; then
+      gem_broken=1
+      printc yellow "warning\n"
+    fi
+    echo "Please remove \`--user-install' flag from \`$gemrc'." | indent
+    : $((warnings++))
+  fi
+done
+[ -n "$gem_broken" ] || printc green "OK\n"
 
 [ $warnings -eq 0 ]
