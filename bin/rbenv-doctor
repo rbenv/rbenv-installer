@@ -75,7 +75,7 @@ RBENV_ROOT="${RBENV_ROOT:-$(rbenv root)}"
 
 OLDIFS="$IFS"
 IFS=:
-path=( $PATH )
+path=($PATH)
 IFS="$OLDIFS"
 
 echo -n "Checking for rbenv shims in PATH: "
@@ -94,7 +94,7 @@ else
 fi
 
 echo -n "Checking \`rbenv install' support: "
-rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/rbenv-install 2>/dev/null || true
+rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || true
                     which -a rbenv-install || true
                   } | uniq)"
 num_installs="$(wc -l <<<"$rbenv_installs")"
