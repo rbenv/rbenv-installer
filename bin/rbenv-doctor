@@ -54,7 +54,7 @@ if [ $num_locations -eq 0 ]; then
       echo "directory is not present in PATH. Please add it to PATH by configuring"
       echo "your \`~/${bashrc}', \`~/.zshrc', or \`~/.config/fish/config.fish'."
     else
-      echo "Please refer to https://github.com/sstephenson/rbenv#installation"
+      echo "Please refer to https://github.com/rbenv/rbenv#installation"
     fi
   } | indent
   exit 1
@@ -101,7 +101,7 @@ num_installs="$(wc -l <<<"$rbenv_installs")"
 if [ $num_installs -eq 0 ]; then
   printc red "not found\n"
   { echo "Unless to plan to add Ruby versions manually, you should install ruby-build."
-    echo "Please refer to https://github.com/sstephenson/ruby-build#installation"
+    echo "Please refer to https://github.com/rbenv/ruby-build#installation"
   }
   echo
   : $((warnings++))
