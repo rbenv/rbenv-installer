@@ -139,17 +139,45 @@ else
 fi
 
 echo -n "Checking RubyGems settings: "
-gem_broken=
+gem_broken=0
 for gemrc in ~/.gemrc /etc/gemrc; do
   if grep -q -e --user-install "$gemrc" 2>/dev/null; then
-    if [ -z "$gem_broken" ]; then
-      gem_broken=1
-      printc yellow "warning\n"
-    fi
+    [ "$((gem_broken++))" -gt 0 ] || printc yellow "warning\n"
     echo "Please remove \`--user-install' flag from \`$gemrc'." | indent
     : $((warnings++))
   fi
 done
-[ -n "$gem_broken" ] || printc green "OK\n"
+[ "$gem_broken" -gt 0 ] || printc green "OK\n"
+
+echo -n "Auditing installed plugins: "
+OLDIFS="$IFS"
+IFS=$'\n'
+hooks=(`rbenv hooks exec`)
+IFS="$OLDIFS"
+plugin_broken=0
+for hook in "${hooks[@]}"; do
+  plugin_name=
+  message=
+  case "$hook" in
+  */"~gem-rehash.bash" )
+    plugin_name=rbenv-gem-rehash
+    message="functionality is now included in rbenv core. Please remove the plugin."
+    ;;
+  */"bundler.bash" )
+    plugin_name=rbenv-bundler
+    message="is considered harmful. Please remove the plugin and \`rm -rf \$(rbenv root)/shims && rbenv rehash'."
+    ;;
+  esac
+
+  if [ -n "$plugin_name" ]; then
+    [ "$((plugin_broken++))" -gt 0 ] || printc yellow "warning\n"
+    { printc bright "$plugin_name"
+      echo " $message"
+      echo "  (found in \`${hook}')"
+    } | indent
+    : $((warnings++))
+  fi
+done
+[ "$plugin_broken" -gt 0 ] || printc green "OK\n"
 
 [ $warnings -eq 0 ]
