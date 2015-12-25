@@ -63,7 +63,8 @@ else
     mkdir -p ~/.rbenv
     cd ~/.rbenv
     git init
-    git remote add -f origin https://github.com/rbenv/rbenv.git
+    git remote add origin https://github.com/rbenv/rbenv.git
+    git fetch origin master
     git checkout master
     try_bash_extension
     rbenv=~/.rbenv/bin/rbenv
@@ -101,6 +102,9 @@ else
     git clone https://github.com/rbenv/ruby-build.git "${rbenv_root}/plugins/ruby-build"
   fi
 fi
+
+# Enable caching of rbenv-install downloads
+mkdir -p "${rbenv_root}/cache"
 
 echo
 echo "Running doctor script to verify installation..."
