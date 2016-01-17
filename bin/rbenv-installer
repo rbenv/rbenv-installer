@@ -60,12 +60,7 @@ else
     rbenv="$(brew --prefix)/bin/rbenv"
   else
     echo "Installing rbenv with git..."
-    mkdir -p ~/.rbenv
-    cd ~/.rbenv
-    git init
-    git remote add origin https://github.com/rbenv/rbenv.git
-    git fetch origin master
-    git checkout master
+    git clone https://github.com/rbenv/rbenv.git ~/.rbenv
     try_bash_extension
     rbenv=~/.rbenv/bin/rbenv
 
