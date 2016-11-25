@@ -48,7 +48,7 @@ if [ -n "$rbenv" ]; then
     fi
   elif git remote -v 2>/dev/null | grep -q rbenv; then
     echo "Trying to update with git..."
-    git pull origin master
+    git pull --tags origin master
     cd ..
     try_bash_extension
   fi
