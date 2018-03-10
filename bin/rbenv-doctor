@@ -95,7 +95,7 @@ fi
 
 echo -n "Checking \`rbenv install' support: "
 rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || true
-                    which -a rbenv-install || true
+                    which -a rbenv-install 2>/dev/null || true
                   } | uniq)"
 num_installs="$(wc -l <<<"$rbenv_installs")"
 if [ $num_installs -eq 0 ]; then
