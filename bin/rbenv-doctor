@@ -141,7 +141,7 @@ fi
 echo -n "Checking RubyGems settings: "
 gem_broken=0
 for gemrc in ~/.gemrc /etc/gemrc; do
-  if grep -q -e --user-install "$gemrc" 2>/dev/null; then
+  if grep -v '^#' "$gemrc" 2>/dev/null | grep -q -e --user-install; then
     [ "$((gem_broken++))" -gt 0 ] || printc yellow "warning\n"
     echo "Please remove \`--user-install' flag from \`$gemrc'." | indent
     : $((warnings++))
