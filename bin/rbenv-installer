@@ -64,8 +64,8 @@ else
     cd ~/.rbenv
     git init
     git remote add origin https://github.com/rbenv/rbenv.git
-    git fetch origin master
-    git checkout master
+    git checkout -b master
+    git pull origin master
     try_bash_extension
     rbenv=~/.rbenv/bin/rbenv
 
