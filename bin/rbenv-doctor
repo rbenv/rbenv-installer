@@ -98,7 +98,7 @@ rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || 
                     which -a rbenv-install || true
                   } | uniq)"
 num_installs="$(wc -l <<<"$rbenv_installs")"
-if [ $num_installs -eq 0 ]; then
+if [ -z "$rbenv_installs" ]; then
   printc red "not found\n"
   { echo "Unless to plan to add Ruby versions manually, you should install ruby-build."
     echo "Please refer to https://github.com/rbenv/ruby-build#installation"
