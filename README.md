@@ -24,6 +24,11 @@ startup before running the installer. You can do this by configuring your `~/.ba
 export PATH=$HOME/.rbenv/bin:$PATH
 ```
 
+Also, after installing add this to your shell startup:
+
+```
+eval "$(rbenv init -)"
+```
 
 ## rbenv-doctor
 
