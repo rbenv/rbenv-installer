@@ -17,6 +17,14 @@ curl -fsSL https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-install
 wget -q https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-installer -O- | bash
 ```
 
+Small caveat, for Ubuntu you are going to need to modify the PATH in your shell 
+startup before running the installer. You can do this by configuring your `~/.bashrc`, `~/.zshrc`, or `~/.config/fish/config.fish`, with something like:
+
+```
+export PATH=$HOME/.rbenv/bin:$PATH
+```
+
+
 ## rbenv-doctor
 
 After the installation, a separate `rbenv-doctor` script is run to verify the
