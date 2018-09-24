@@ -63,9 +63,8 @@ else
     mkdir -p ~/.rbenv
     cd ~/.rbenv
     git init
-    git remote add origin https://github.com/rbenv/rbenv.git
-    git checkout -b master
-    git pull origin master
+    git remote add -f -t master origin https://github.com/rbenv/rbenv.git
+    git checkout -b master origin/master
     try_bash_extension
     rbenv=~/.rbenv/bin/rbenv
 
