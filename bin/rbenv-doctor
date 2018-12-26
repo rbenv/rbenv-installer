@@ -53,6 +53,8 @@ if [ $num_locations -eq 0 ]; then
       echo "You seem to have rbenv installed in \`$HOME/.rbenv/bin', but that"
       echo "directory is not present in PATH. Please add it to PATH by configuring"
       echo "your \`~/${bashrc}', \`~/.zshrc', or \`~/.config/fish/config.fish'."
+      echo "For example (edit this command to your environment):"
+      echo "echo 'export PATH=\"\$HOME/.rbenv/bin:\$HOME/.rbenv/shims:\$PATH\"' >> ~/.bash_profile"
     else
       echo "Please refer to https://github.com/rbenv/rbenv#installation"
     fi
