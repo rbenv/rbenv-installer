@@ -31,7 +31,12 @@ http() {
   fi
 }
 
-rbenv="$(command -v rbenv ~/.rbenv/bin/rbenv | head -1)"
+rbenv_root=~/.rbenv
+if [ -n "$RBENV_ROOT" ];then
+  rbenv_root="$RBENV_ROOT"
+fi
+
+rbenv="$(command -v rbenv ${rbenv_root}/bin/rbenv | head -1)"
 
 if [ -n "$rbenv" ]; then
   echo "rbenv already seems installed in \`$rbenv'."
@@ -60,13 +65,13 @@ else
     rbenv="$(brew --prefix)/bin/rbenv"
   else
     echo "Installing rbenv with git..."
-    mkdir -p ~/.rbenv
-    cd ~/.rbenv
+    mkdir -p ${rbenv_root}
+    cd ${rbenv_root}
     git init
     git remote add -f -t master origin https://github.com/rbenv/rbenv.git
     git checkout -b master origin/master
     try_bash_extension
-    rbenv=~/.rbenv/bin/rbenv
+    rbenv=${rbenv_root}/bin/rbenv
 
     if [ ! -e versions ] && [ -w /opt/rubies ]; then
       ln -s /opt/rubies versions
