@@ -105,9 +105,12 @@ fi
 # Enable caching of rbenv-install downloads
 mkdir -p "${rbenv_root}/cache"
 
-echo
-echo "Running doctor script to verify installation..."
-http https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | "$BASH"
+getopts ":d" NO_DOCTOR;
+if [[ $NO_DOCTOR != "d" ]]; then
+  echo
+  echo "Running doctor script to verify installation..."
+  http https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor | "$BASH"
+fi
 
 echo
 echo "All done!"
