@@ -42,7 +42,7 @@ if [ -n "$rbenv" ]; then
     brew update >/dev/null
     if [ "$(./rbenv --version)" < "1.0.0" ] && brew list rbenv | grep -q rbenv/HEAD; then
       brew uninstall rbenv
-      brew install rbenv --without-ruby-build
+      brew install rbenv
     else
       brew upgrade rbenv
     fi
