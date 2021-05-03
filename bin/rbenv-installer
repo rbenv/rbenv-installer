@@ -102,7 +102,7 @@ fi
 echo "$((++i)). Run \`rbenv init' to view instructions on how to configure rbenv for your shell."
 echo "$((++i)). Launch a new terminal window after editing shell configuration files."
 
-url="https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-doctor"
+url="https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-doctor"
 if false && type -p curl >/dev/null; then
   echo "$((++i)). (Optional) Run the doctor command to verify the installation:"
   printf '   curl -fsSL "%s" | bash\n' "$url"
