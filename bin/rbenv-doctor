@@ -131,8 +131,10 @@ if [ $num_rubies -eq 0 ]; then
   printc yellow "none\n"
   echo "There aren't any Ruby versions installed under \`$RBENV_ROOT/versions'." | indent
   [ $num_installs -eq 0 ] || {
+    latest_version="$(rbenv install -l 2>/dev/null | grep -vFe - | tail -1)"
+    [ -n "$latest_version" ] || latest_version="<version>"
     echo -n "You can install Ruby versions like so: "
-    printc bright "rbenv install 2.2.4\n"
+    printc bright "rbenv install $latest_version\n"
   } | indent
 else
   printc green "%d versions\n" $num_rubies
