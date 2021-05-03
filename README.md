@@ -19,9 +19,7 @@ wget -q https://github.com/rbenv/rbenv-installer/raw/master/bin/rbenv-installer 
 
 ## rbenv-doctor
 
-After the installation, a separate `rbenv-doctor` script is run to verify the
-success of the installation and to detect common issues. You can run
-`rbenv-doctor` on your machine separately to verify the state of your install:
+You can verify the state of your rbenv installation with:
 
 ```sh
 # with curl
