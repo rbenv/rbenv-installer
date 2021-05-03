@@ -39,12 +39,6 @@ fi
 
 warnings=0
 
-if [ $(uname -s) = "Darwin" ]; then
-  bashrc=".bash_profile"
-else
-  bashrc=".bashrc"
-fi
-
 echo -n "Checking for \`rbenv' in PATH: "
 num_locations="$(which -a rbenv | uniq | wc -l)"
 if [ $num_locations -eq 0 ]; then
@@ -52,7 +46,7 @@ if [ $num_locations -eq 0 ]; then
   { if [ -x ~/.rbenv/bin/rbenv ]; then
       echo "You seem to have rbenv installed in \`$HOME/.rbenv/bin', but that"
       echo "directory is not present in PATH. Please add it to PATH by configuring"
-      echo "your \`~/${bashrc}', \`~/.zshrc', or \`~/.config/fish/config.fish'."
+      echo "your shell initialization files."
     else
       echo "Please refer to https://github.com/rbenv/rbenv#installation"
     fi
