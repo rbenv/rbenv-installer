@@ -75,9 +75,25 @@ IFS="$OLDIFS"
 echo -n "Checking for rbenv shims in PATH: "
 shims_dir="${RBENV_ROOT}/shims"
 found=""
-for dir in "${path[@]}"; do [ "$dir" != "$shims_dir" ] || found=true; done
+precedence_problem=""
+for dir in "${path[@]}"; do
+  if [ "$dir" = "$shims_dir" ]; then
+    found=true
+  elif [ -x "$dir"/ruby ] && [ -z "$found" ]; then
+    precedence_problem="$dir"
+  fi
+done
 if [ -n "$found" ]; then
-  printc green "OK\n"
+  if [ -n "$precedence_problem" ]; then
+    printc yellow "found at wrong position\n"
+    { echo "The directory \`$shims_dir' is present in PATH, but is listed too late."
+      echo "The Ruby version found in \`$precedence_problem' will have precedence. Please reorder your PATH."
+    } | indent
+    echo
+    : $((warnings++))
+  else
+    printc green "OK\n"
+  fi
 else
   printc red "not found\n"
   { echo "The directory \`$shims_dir' must be present in PATH for rbenv to work."
@@ -176,4 +192,6 @@ for hook in "${hooks[@]}"; do
 done
 [ "$plugin_broken" -gt 0 ] || printc green "OK\n"
 
-[ $warnings -eq 0 ]
+if [ $warnings -gt 0 ]; then
+  exit 1
+fi
