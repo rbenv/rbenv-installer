@@ -9,6 +9,11 @@ count-lines() {
   printf "%d" "$(wc -l)"
 }
 
+command-list() {
+  # shellcheck disable=SC2230
+  which -a "$1"
+}
+
 indent() {
   sed 's/^/  /'
 }
@@ -44,7 +49,7 @@ fi
 warnings=0
 
 echo -n "Checking for \`rbenv' in PATH: "
-num_locations="$(which -a rbenv | uniq | count-lines)"
+num_locations="$(command-list rbenv | uniq | count-lines)"
 if [ "$num_locations" -eq 0 ]; then
   printc red "not found"
   echo
@@ -58,7 +63,7 @@ if [ "$num_locations" -eq 0 ]; then
   } | indent
   exit 1
 elif [ "$num_locations" -eq 1 ]; then
-  printc green "$(which rbenv)"
+  printc green "$(command -v rbenv)"
   echo
 else
   printc yellow "multiple"
@@ -66,7 +71,7 @@ else
   { echo "You seem to have multiple rbenv installs in the following locations."
     echo "Please pick just one installation and remove the others."
     echo
-    which -a rbenv
+    command-list rbenv
   } | indent
   echo
   : $((warnings++))
@@ -111,7 +116,7 @@ fi
 
 echo -n "Checking \`rbenv install' support: "
 rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || true
-                    which -a rbenv-install 2>/dev/null || true
+                    command-list rbenv-install 2>/dev/null || true
                   } | uniq)"
 num_installs="$(count-lines <<<"$rbenv_installs")"
 if [ -z "$rbenv_installs" ]; then
