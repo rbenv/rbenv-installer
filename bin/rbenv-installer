@@ -6,6 +6,7 @@ type -p brew >/dev/null && homebrew=1
 
 try_bash_extension() {
   if [ -x src/configure ]; then
+    # shellcheck disable=SC2015
     src/configure && make -C src || {
       echo "Optional bash extension failed to build, but things will still work normally."
     }
