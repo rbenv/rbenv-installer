@@ -1,0 +1,16 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Shellcheck
+        run: |
+          set -o pipefail
+          shellcheck -s bash bin/* -f json1 | \
+            jq -r '.comments[] | "::error file=\(.file),line=\(.line),col=\(.column)::SC\(.code): \(.message | gsub("\n"; " "))"'
