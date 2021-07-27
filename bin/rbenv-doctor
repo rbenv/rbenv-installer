@@ -1,223 +1,168 @@
 #!/bin/bash
-# Usage: rbenv doctor
-# Summary: Detects common problems in rbenv installation
 
-set -e
-[ -n "$RBENV_DEBUG" ] && set -x
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
 
-count-lines() {
-  printf "%d" "$(wc -l)"
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+
+__my_git_ps1 () {
+    local branch
+    branch=$(git branch --show-current 2> /dev/null)
+    
+    #shellcheck disable=SC2059
+    printf "${branch:+:}\033[0;36m$branch\033[0;00m"
 }
 
-command-list() {
-  # shellcheck disable=SC2230
-  which -a "$1"
-}
+# bind '"\C-k":'
+eval "$(rbenv init -)"
 
-indent() {
-  sed 's/^/  /'
-}
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
 
-printc() {
-  local color_name="color_$1"
-  local msg="$2"
-  printf "%s%s%s" "${!color_name}" "$msg" "$color_reset"
-}
+# append to the history file, don't overwrite it
+shopt -s histappend
 
-if [ -t 1 ]; then
-  # shellcheck disable=SC2034
-  color_red=$'\e[31m'
-  # shellcheck disable=SC2034
-  color_green=$'\e[32m'
-  # shellcheck disable=SC2034
-  color_yellow=$'\e[1;33m'
-  # shellcheck disable=SC2034
-  color_bright=$'\e[1;37m'
-  color_reset=$'\e[0m'
-else
-  # shellcheck disable=SC2034
-  color_red=""
-  # shellcheck disable=SC2034
-  color_green=""
-  # shellcheck disable=SC2034
-  color_yellow=""
-  # shellcheck disable=SC2034
-  color_bright=""
-  color_reset=""
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+#shopt -s globstar
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
 fi
 
-warnings=0
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color|*-256color) color_prompt=yes;;
+esac
 
-echo -n "Checking for \`rbenv' in PATH: "
-num_locations="$(command-list rbenv | uniq | count-lines)"
-if [ "$num_locations" -eq 0 ]; then
-  printc red "not found"
-  echo
-  { if [ -x ~/.rbenv/bin/rbenv ]; then
-      echo "You seem to have rbenv installed in \`$HOME/.rbenv/bin', but that"
-      echo "directory is not present in PATH. Please add it to PATH by configuring"
-      echo "your shell initialization files."
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+#force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
     else
-      echo "Please refer to https://github.com/rbenv/rbenv#installation"
+	color_prompt=
     fi
-  } | indent
-  exit 1
-elif [ "$num_locations" -eq 1 ]; then
-  printc green "$(command -v rbenv)"
-  echo
+fi
+
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]$(__my_git_ps1)
+\$ '
 else
-  printc yellow "multiple"
-  echo
-  { echo "You seem to have multiple rbenv installs in the following locations."
-    echo "Please pick just one installation and remove the others."
-    echo
-    command-list rbenv
-  } | indent
-  echo
-  : $((warnings++))
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
 fi
+unset color_prompt force_color_prompt
 
-RBENV_ROOT="${RBENV_ROOT:-$(rbenv root)}"
-
-echo -n "Checking for rbenv shims in PATH: "
-shims_dir="${RBENV_ROOT}/shims"
-found=""
-precedence_problem=""
-IFS=: read -r -a path <<<"$PATH" || true
-for dir in "${path[@]}"; do
-  if [ "$dir" = "$shims_dir" ]; then
-    found=true
-  elif [ -x "$dir"/ruby ] && [ -z "$found" ]; then
-    precedence_problem="$dir"
-  fi
-done
-if [ -n "$found" ]; then
-  if [ -n "$precedence_problem" ]; then
-    printc yellow "found at wrong position"
-    echo
-    { echo "The directory \`$shims_dir' is present in PATH, but is listed too late."
-      echo "The Ruby version found in \`$precedence_problem' will have precedence. Please reorder your PATH."
-    } | indent
-    echo
-    : $((warnings++))
-  else
-    printc green "OK"
-    echo
-  fi
-else
-  printc red "not found"
-  echo
-  { echo "The directory \`$shims_dir' must be present in PATH for rbenv to work."
-    echo "Please run \`rbenv init' and follow the instructions."
-  } | indent
-  echo
-  : $((warnings++))
-fi
-
-echo -n "Checking \`rbenv install' support: "
-rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || true
-                    command-list rbenv-install 2>/dev/null || true
-                  } | uniq)"
-num_installs="$(count-lines <<<"$rbenv_installs")"
-if [ -z "$rbenv_installs" ]; then
-  printc red "not found"
-  echo
-  { echo "Unless you plan to add Ruby versions manually, you should install ruby-build."
-    echo "Please refer to https://github.com/rbenv/ruby-build#installation"
-  }
-  echo
-  : $((warnings++))
-elif [ "$num_installs" -eq 1 ]; then
-  printc green "$rbenv_installs"
-  if [[ $rbenv_installs == "$RBENV_ROOT"/plugins/* ]]; then
-    rbenv_install_cmd="${rbenv_installs##*/}"
-    rbenv_install_version="$(rbenv "${rbenv_install_cmd#rbenv-}" --version || true)"
-  else
-    rbenv_install_version="$("$rbenv_installs" --version || true)"
-  fi
-  printf " (%s)\n" "$rbenv_install_version"
-else
-  printc yellow "multiple"
-  echo
-  { echo "You seem to have multiple \`rbenv-install' in the following locations."
-    echo "Please pick just one installation and remove the others."
-    echo
-    echo "$rbenv_installs"
-  } | indent
-  echo
-  : $((warnings++))
-fi
-
-echo -n "Counting installed Ruby versions: "
-num_rubies="$(rbenv versions --bare | count-lines)"
-if [ "$num_rubies" -eq 0 ]; then
-  printc yellow "none"
-  echo
-  echo "There aren't any Ruby versions installed under \`$RBENV_ROOT/versions'." | indent
-  [ "$num_installs" -eq 0 ] || {
-    latest_version="$(rbenv install -l 2>/dev/null | grep -vFe - | tail -1)"
-    [ -n "$latest_version" ] || latest_version="<version>"
-    echo -n "You can install Ruby versions like so: "
-    printc bright "rbenv install $latest_version"
-    echo
-  } | indent
-else
-  printc green "$num_rubies versions"
-  echo
-fi
-
-echo -n "Checking RubyGems settings: "
-gem_broken=0
-for gemrc in ~/.gemrc /etc/gemrc; do
-  if grep -v '^#' "$gemrc" 2>/dev/null | grep -q -e --user-install; then
-    if [ "$((gem_broken++))" -eq 0 ]; then
-      printc yellow "warning"
-      echo
-    fi
-    echo "Please remove \`--user-install' flag from \`$gemrc'." | indent
-    : $((warnings++))
-  fi
-done
-if [ "$gem_broken" -eq 0 ]; then
-  printc green "OK"
-  echo
-fi
-
-echo -n "Auditing installed plugins: "
-hooks_list="$(rbenv hooks exec || true)"
-IFS=$'\n' read -r -d '' -a hooks <<<"$hooks_list" || true
-plugin_broken=0
-for hook in "${hooks[@]}"; do
-  plugin_name=
-  message=
-  case "$hook" in
-  */"~gem-rehash.bash" )
-    plugin_name=rbenv-gem-rehash
-    message="functionality is now included in rbenv core. Please remove the plugin."
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
     ;;
-  */"bundler.bash" )
-    plugin_name=rbenv-bundler
-    message="is considered harmful. Please remove the plugin and \`rm -rf \$(rbenv root)/shims && rbenv rehash'."
+*)
     ;;
-  esac
+esac
 
-  if [ -n "$plugin_name" ]; then
-    if [ "$((plugin_broken++))" -eq 0 ]; then
-      printc yellow "warning"
-      echo
-    fi
-    { printc bright "$plugin_name"
-      echo " $message"
-      echo "  (found in \`${hook}')"
-    } | indent
-    : $((warnings++))
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# colored GCC warnings and errors
+#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+if [ -f ~/.bash_aliases ]; then
+    # shellcheck disable=SC1090
+    . ~/.bash_aliases
+fi
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
   fi
-done
-if [ "$plugin_broken" -eq 0 ]; then
-  printc green "OK"
-  echo
 fi
 
-if [ "$warnings" -gt 0 ]; then
-  exit 1
-fi
+export NVM_DIR="$HOME/.nvm"
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# shellcheck disable=SC1091
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+alias .bashrc="source ~/.bashrc"
+alias e.bashrc="code ~/.bashrc"
+alias tree='find . -print | sed -e "s;[^/]*/;|____;g;s;____|; |;g"'
+# export PATH="$PATH:$HOME/bin:$HOME/.local/bin/"
+
+jest() { 
+    PARAMS=""
+    DEBUG=0
+    while (( "$#" )); do
+    case "$1" in
+        --inspect*) DEBUG="$1" ; shift ;;
+        *) PARAMS="$PARAMS $1"; shift ;;
+    esac
+    done
+    eval set -- "$PARAMS"   # reset $@
+
+    if [ "$DEBUG" != "0" ]; then
+        node "$DEBUG" "$(realpath --relative-to="$PWD" "$(npm root)")/jest/bin/jest.js" "$@"
+    else
+        "$(realpath --relative-to="$PWD" "$(npm root)")/jest/bin/jest.js" "$@"; 
+    fi
+}
+
+export SUDO_EDITOR="gedit"
+
+# Fix weird jetbrains terminal behavior ^[[5D and ^[[5C
+bind '"\e[5C": forward-word'
+bind '"\e[5D": backward-word'
