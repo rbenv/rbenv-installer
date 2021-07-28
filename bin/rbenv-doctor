@@ -18,6 +18,12 @@ indent() {
   sed 's/^/  /'
 }
 
+# for ubuntu /bin is a symlink to /usr/bin
+# which -a doesn't know the binaries are the same
+fix-usr-bin() {
+  sed 's:^/usr/bin/:/bin/:'
+}
+
 printc() {
   local color_name="color_$1"
   local msg="$2"
@@ -49,7 +55,7 @@ fi
 warnings=0
 
 echo -n "Checking for \`rbenv' in PATH: "
-num_locations="$(command-list rbenv | uniq | count-lines)"
+num_locations="$(command-list rbenv | fix-usr-bin | uniq | count-lines)"
 if [ "$num_locations" -eq 0 ]; then
   printc red "not found"
   echo
