@@ -18,22 +18,10 @@ indent() {
   sed 's/^/  /'
 }
 
-# ignore /bin symlink on ubuntu if /usr/bin is already present
-remove-bin-symlink() {
-  remove_bin=false
-
-  # Have to buffer whole pipe then check for duplicate
-  found_paths=$(cat)
-  if [[ $found_paths == *"/usr/bin/rbenv"* && $found_paths == *"/bin/rbenv"* ]]; then
-    remove_bin=true
-  fi
-
-  # Recreate pipe with /bin/rbenv removed if needed
-  while read -r path_line; do
-    if [ $remove_bin = false ] || [ "$path_line" != "/bin/rbenv" ]; then
-      echo "$path_line";
-    fi
-  done <<< "$found_paths"
+# for ubuntu /bin is a symlink to /usr/bin
+# which -a doesn't know the binaries are the same
+fix-usr-bin() {
+  sed 's:^/usr/bin/:/bin/:'
 }
 
 printc() {
@@ -67,7 +55,7 @@ fi
 warnings=0
 
 echo -n "Checking for \`rbenv' in PATH: "
-num_locations="$(command-list rbenv | remove-bin-symlink | uniq | count-lines)"
+num_locations="$(command-list rbenv | fix-usr-bin | uniq | count-lines)"
 if [ "$num_locations" -eq 0 ]; then
   printc red "not found"
   echo
