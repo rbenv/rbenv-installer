@@ -11,10 +11,10 @@ installed if `rbenv install` is not already available.
 
 ```sh
 # with curl
-curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+curl -fsSL https://git.io/rbenv-installer.sh  | bash
 
 # alternatively, with wget
-wget -q https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer -O- | bash
+wget -q https://git.io/rbenv-installer.sh  -O- | bash
 ```
 
 The installer script is meant for casual use on your own development machine.
