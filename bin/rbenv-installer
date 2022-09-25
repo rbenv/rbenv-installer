@@ -88,6 +88,7 @@ echo "Note that this installer does NOT edit your shell configuration files:"
 i=0
 rbenv_command="rbenv"
 if [ -x ~/.rbenv/bin ]; then
+  # shellcheck disable=SC2088
   rbenv_command='~/.rbenv/bin/rbenv'
 fi
 echo "$((++i)). Run \`$rbenv_command init' to view instructions on how to configure rbenv for your shell."
