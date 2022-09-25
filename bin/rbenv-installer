@@ -4,15 +4,6 @@ set -e
 homebrew=
 type -p brew >/dev/null && homebrew=1
 
-try_bash_extension() {
-  if [ -x src/configure ]; then
-    # shellcheck disable=SC2015
-    src/configure && make -C src || {
-      echo "Optional bash extension failed to build, but things will still work normally."
-    }
-  fi
-}
-
 if ! type -p git >/dev/null; then
   git() {
     echo "Error: git is required to proceed. Please install git and try again." >&2
@@ -38,7 +29,6 @@ if [ -n "$rbenv" ]; then
     echo "Trying to update with git..."
     git pull --tags origin master
     cd ..
-    try_bash_extension
   fi
 else
   if [ -n "$homebrew" ]; then
@@ -53,7 +43,6 @@ else
     git init
     git remote add -f -t master origin https://github.com/rbenv/rbenv.git
     git checkout -b master origin/master
-    try_bash_extension
     rbenv=~/.rbenv/bin/rbenv
 
     if [ ! -e versions ] && [ -w /opt/rubies ]; then
@@ -97,10 +86,11 @@ echo
 echo "All done!"
 echo "Note that this installer does NOT edit your shell configuration files:"
 i=0
+rbenv_command="rbenv"
 if [ -x ~/.rbenv/bin ]; then
-  echo "$((++i)). You'll want to ensure that \`~/.rbenv/bin' is added to PATH."
+  rbenv_command='~/.rbenv/bin/rbenv'
 fi
-echo "$((++i)). Run \`rbenv init' to view instructions on how to configure rbenv for your shell."
+echo "$((++i)). Run \`$rbenv_command init' to view instructions on how to configure rbenv for your shell."
 echo "$((++i)). Launch a new terminal window after editing shell configuration files."
 
 url="https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor"
