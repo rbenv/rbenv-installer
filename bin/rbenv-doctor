@@ -172,23 +172,6 @@ else
   echo
 fi
 
-echo -n "Checking RubyGems settings: "
-gem_broken=0
-for gemrc in ~/.gemrc /etc/gemrc; do
-  if grep -v '^#' "$gemrc" 2>/dev/null | grep -q -e --user-install; then
-    if [ "$((gem_broken++))" -eq 0 ]; then
-      printc yellow "warning"
-      echo
-    fi
-    echo "Please remove \`--user-install' flag from \`$gemrc'." | indent
-    : $((warnings++))
-  fi
-done
-if [ "$gem_broken" -eq 0 ]; then
-  printc green "OK"
-  echo
-fi
-
 echo -n "Auditing installed plugins: "
 hooks_list="$(rbenv hooks exec || true)"
 IFS=$'\n' read -r -d '' -a hooks <<<"$hooks_list" || true
