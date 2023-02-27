@@ -21,6 +21,7 @@ alternatively, with wget:
   wget -q https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer -O- | bash
   ```
 
+> **Note**
 The installer script is meant for casual use on your own development machine.
 For automating installation across machines it's better to _avoid_ using this
 script in favor of fine-tuning rbenv & ruby-build installation manually. Some
