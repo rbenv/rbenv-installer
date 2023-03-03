@@ -9,14 +9,19 @@ install/upgrade`. Otherwise, rbenv is installed under `~/.rbenv`.
 Additionally, [ruby-build](https://github.com/rbenv/ruby-build#readme) is also
 installed if `rbenv install` is not already available.
 
-```sh
-# with curl
-curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+with curl:
 
-# alternatively, with wget
-wget -q https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer -O- | bash
-```
+  ```sh
+  curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+  ```
 
+alternatively, with wget:
+
+  ```sh
+  wget -q https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer -O- | bash
+  ```
+
+> **Note**
 The installer script is meant for casual use on your own development machine.
 For automating installation across machines it's better to _avoid_ using this
 script in favor of fine-tuning rbenv & ruby-build installation manually. Some
@@ -28,10 +33,14 @@ you are installing rbenv there, you are likely doing something wrong.
 
 You can verify the state of your rbenv installation with:
 
-```sh
-# with curl
-curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor | bash
+with curl:
 
-# alternatively, with wget
-wget -q https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor -O- | bash
-```
+  ```sh
+  curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor | bash
+  ```
+
+alternatively, with wget:
+
+  ```sh
+  wget -q https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor -O- | bash
+  ```
