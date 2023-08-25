@@ -14,7 +14,7 @@ fi
 rbenv="$(command -v rbenv ~/.rbenv/bin/rbenv | head -1)"
 
 if [ -n "$rbenv" ]; then
-  echo "rbenv already seems installed in \`$rbenv'."
+  echo "rbenv already seems installed in \'$rbenv'."
   cd "${rbenv%/*}"
 
   if [ -x ./brew ]; then
