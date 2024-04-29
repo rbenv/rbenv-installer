@@ -82,24 +82,16 @@ fi
 # Enable caching of rbenv-install downloads
 mkdir -p "${rbenv_root}/cache"
 
-echo
-echo "All done!"
-echo "Note that this installer does NOT edit your shell configuration files:"
-i=0
-rbenv_command="rbenv"
-if [ -x ~/.rbenv/bin ]; then
-  # shellcheck disable=SC2088
-  rbenv_command='~/.rbenv/bin/rbenv'
-fi
-echo "$((++i)). Run \`$rbenv_command init' to view instructions on how to configure rbenv for your shell."
-echo "$((++i)). Launch a new terminal window after editing shell configuration files."
+# Detect the type of shell that invoked the installer:
+shell="$(ps -p "$PPID" -o 'args=' 2>/dev/null || true)"
+shell="${shell%% *}"
+shell="${shell##-}"
+shell="${shell:-$SHELL}"
+shell="${shell##*/}"
 
-url="https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor"
-if false && type -p curl >/dev/null; then
-  echo "$((++i)). (Optional) Run the doctor command to verify the installation:"
-  printf '   curl -fsSL "%s" | bash\n' "$url"
-elif type -p wget >/dev/null; then
-  echo "$((++i)). (Optional) Run the doctor command to verify the installation:"
-  printf '   wget -q "%s" -O- | bash\n' "$url"
-fi
 echo
+echo "Setting up your shell:"
+"$rbenv" init "$shell"
+
+echo
+echo "All done! After reloading your terminal window, rbenv should be good to go."
