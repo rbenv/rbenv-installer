@@ -44,10 +44,6 @@ else
     git remote add -f -t master origin https://github.com/rbenv/rbenv.git
     git checkout -b master origin/master
     rbenv=~/.rbenv/bin/rbenv
-
-    if [ ! -e versions ] && [ -w /opt/rubies ]; then
-      ln -s /opt/rubies versions
-    fi
   fi
 fi
 
