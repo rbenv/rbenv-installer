@@ -89,8 +89,18 @@ shell="${shell##-}"
 shell="${shell:-$SHELL}"
 shell="${shell##*/}"
 
+case "$shell" in
+bash | zsh| ksh | ksh93 | mksh | fish )
+  # allow known shells to be configured
+  ;;
+* )
+  # default to bash in case the parent process is not a known shell
+  shell=bash
+  ;;
+esac
+
 echo
-echo "Setting up your shell:"
+echo "Setting up your shell with \`rbenv init $shell' ..."
 "$rbenv" init "$shell"
 
 echo
