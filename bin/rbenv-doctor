@@ -14,29 +14,15 @@ command-list() {
   which -a "$1"
 }
 
+deduplicate-paths() {
+  local path
+  while read -r path; do
+    readlink -f "$path" || printf "%s\n" "$path"
+  done | uniq
+}
+
 indent() {
   sed 's/^/  /'
-}
-
-# for ubuntu /bin is a symlink to /usr/bin
-# which -a doesn't know the binaries are the same
-fix-usr-bin() {
-  sed 's:^/usr/bin/:/bin/:'
-}
-
-# NOTE: readlink -f is supported on MacOS 12.3+
-#       (https://apple.stackexchange.com/a/464138/141312)
-canonicalize-symlinks() {
-  files=()
-  IFS=$'\n' read -d '' -r -a files
-  count=${#files[@]}
-  idx=0
-  while [[ $idx -lt $count ]]; do
-    if ! readlink -f "${files[$idx]}" 2> /dev/null; then
-      echo "${files[$idx]}"
-    fi
-    idx=$((idx+1))
-  done
 }
 
 printc() {
@@ -70,7 +56,7 @@ fi
 warnings=0
 
 echo -n "Checking for \`rbenv' in PATH: "
-num_locations="$(command-list rbenv | fix-usr-bin | canonicalize-symlinks | uniq | count-lines)"
+num_locations="$(command-list rbenv | deduplicate-paths | count-lines)"
 if [ "$num_locations" -eq 0 ]; then
   printc red "not found"
   echo
@@ -138,7 +124,7 @@ fi
 echo -n "Checking \`rbenv install' support: "
 rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || true
                     command-list rbenv-install 2>/dev/null || true
-                  } | uniq)"
+                  } | deduplicate-paths)"
 num_installs="$(count-lines <<<"$rbenv_installs")"
 if [ -z "$rbenv_installs" ]; then
   printc red "not found"
