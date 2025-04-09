@@ -14,14 +14,15 @@ command-list() {
   which -a "$1"
 }
 
-indent() {
-  sed 's/^/  /'
+deduplicate-paths() {
+  local path
+  while read -r path; do
+    readlink -f "$path" || printf "%s\n" "$path"
+  done | uniq
 }
 
-# for ubuntu /bin is a symlink to /usr/bin
-# which -a doesn't know the binaries are the same
-fix-usr-bin() {
-  sed 's:^/usr/bin/:/bin/:'
+indent() {
+  sed 's/^/  /'
 }
 
 printc() {
@@ -55,7 +56,7 @@ fi
 warnings=0
 
 echo -n "Checking for \`rbenv' in PATH: "
-num_locations="$(command-list rbenv | fix-usr-bin | uniq | count-lines)"
+num_locations="$(command-list rbenv | deduplicate-paths | count-lines)"
 if [ "$num_locations" -eq 0 ]; then
   printc red "not found"
   echo
@@ -123,7 +124,7 @@ fi
 echo -n "Checking \`rbenv install' support: "
 rbenv_installs="$({ ls "$RBENV_ROOT"/plugins/*/bin/rbenv-install 2>/dev/null || true
                     command-list rbenv-install 2>/dev/null || true
-                  } | uniq)"
+                  } | deduplicate-paths)"
 num_installs="$(count-lines <<<"$rbenv_installs")"
 if [ -z "$rbenv_installs" ]; then
   printc red "not found"
