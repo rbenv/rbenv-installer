@@ -17,7 +17,7 @@ command-list() {
 deduplicate-paths() {
   local path
   while read -r path; do
-    readlink -f "$path" || printf "%s\n" "$path"
+    readlink -f "$path" 2>/dev/null || printf "%s\n" "$path"
   done | uniq
 }
 
