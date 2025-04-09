@@ -44,10 +44,6 @@ else
     git remote add -f -t master origin https://github.com/rbenv/rbenv.git
     git checkout -b master origin/master
     rbenv=~/.rbenv/bin/rbenv
-
-    if [ ! -e versions ] && [ -w /opt/rubies ]; then
-      ln -s /opt/rubies versions
-    fi
   fi
 fi
 
@@ -82,24 +78,26 @@ fi
 # Enable caching of rbenv-install downloads
 mkdir -p "${rbenv_root}/cache"
 
-echo
-echo "All done!"
-echo "Note that this installer does NOT edit your shell configuration files:"
-i=0
-rbenv_command="rbenv"
-if [ -x ~/.rbenv/bin ]; then
-  # shellcheck disable=SC2088
-  rbenv_command='~/.rbenv/bin/rbenv'
-fi
-echo "$((++i)). Run \`$rbenv_command init' to view instructions on how to configure rbenv for your shell."
-echo "$((++i)). Launch a new terminal window after editing shell configuration files."
+# Detect the type of shell that invoked the installer:
+shell="$(ps -p "$PPID" -o 'args=' 2>/dev/null || true)"
+shell="${shell%% *}"
+shell="${shell##-}"
+shell="${shell:-$SHELL}"
+shell="${shell##*/}"
 
-url="https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-doctor"
-if false && type -p curl >/dev/null; then
-  echo "$((++i)). (Optional) Run the doctor command to verify the installation:"
-  printf '   curl -fsSL "%s" | bash\n' "$url"
-elif type -p wget >/dev/null; then
-  echo "$((++i)). (Optional) Run the doctor command to verify the installation:"
-  printf '   wget -q "%s" -O- | bash\n' "$url"
-fi
+case "$shell" in
+bash | zsh| ksh | ksh93 | mksh | fish )
+  # allow known shells to be configured
+  ;;
+* )
+  # default to bash in case the parent process is not a known shell
+  shell=bash
+  ;;
+esac
+
 echo
+echo "Setting up your shell with \`rbenv init $shell' ..."
+"$rbenv" init "$shell"
+
+echo
+echo "All done! After reloading your terminal window, rbenv should be good to go."
